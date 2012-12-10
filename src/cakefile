@@ -1,0 +1,16 @@
+{exec} = require "child_process"
+
+callback = (err, stdout, stderr) ->
+  throw err if err
+  console.log stdout + stderr
+
+task "default", "Default", ->
+  invoke "build"
+  invoke "minify"
+
+task "build", "Build Project", ->
+  exec "coffee --compile --output ../lib/js ./coffee/dffn.coffee", callback
+
+task "minify", "Munge Static Files", ->
+  exec "yuicompressor ../lib/js/dffn.js > ../lib/js/dffn.min.js", callback
+  exec "lessc --yui-compress ./less/dffn.less > ../lib/css/dffn.min.css", callback
