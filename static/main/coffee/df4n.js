@@ -16,7 +16,7 @@
   };
 
   addStyles = function() {
-    return $("HEAD").append("<link id='__df4n_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/df4n/static/main/less/df4n.css?v=1_0'>");
+    return $("HEAD").append("<link id='__df4n_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/static/main/less/df4n.css?v=1_0'>");
   };
 
   titleCase = function(str) {
