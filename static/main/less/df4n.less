@@ -1,0 +1,85 @@
+#__df4n_container {
+  z-index: 100;
+  background-color: #fff;
+  overflow: hidden;
+  padding: 10px;
+
+  h1, h2, h3, h4, li, p {
+    font-family: arial;
+    color: black;
+  }
+
+  ul {
+    margin: 0 0 10px 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      margin-left: 10px;
+      line-height: 20px;
+      font-size: 16px;
+    }
+  }
+
+  h1, h2, h4 {
+    margin-bottom: 5px;
+  }
+
+  h4 {
+    font-size: 16px;
+    font-style: italic;
+    font-weight: bold;
+  }
+
+  img {
+    height: 18px;
+  }
+
+  .__df4n_close {
+    position: fixed;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    padding: 8px;
+    background-color: black;
+    color: white;
+    font-weight: bold;
+  }
+
+  #__df4n_itemgroups {
+    width: 50%;
+    float: left;
+
+    .__df4n_itemgroup {
+      width: 50%;
+      display: inline-block;
+      vertical-align: top;
+    }
+  }
+
+  #__df4n_skills {
+    width: 50%;
+    float: right;
+
+    ul {
+      width: 50%;
+
+      li {
+        margin-left: 0;
+
+        .__df4n_level {
+          width: 20px;
+          display: inline-block;
+          text-align: right;
+          font-weight: bold;
+        }
+
+        .__df4n_key {
+          font-weight: bold;
+          display: inline-block;
+          //float: right;
+        }
+      }
+    }
+  }
+}
