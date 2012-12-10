@@ -126,8 +126,6 @@
 
   skillBuild = new SkillBuild($("DIV.build-tab:visible DIV.skill-box TD.selected.c"));
 
-  console.log(skillBuild);
-
   title = $("TITLE").text();
 
   buildName = $(".build-tab:visible H2").text();
