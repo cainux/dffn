@@ -1,3 +1,6 @@
+# Guarentee jQuery
+$ = window.jQuery
+
 # Util Functions
 class util
   this.cleanUp = ->
@@ -67,47 +70,66 @@ class Dffn
         <h2>#{buildName}</h2>
         <div id='__dffn_itemgroups'></div>
         <div id='__dffn_skills'></div>
+        <div id='__dffn_heroes'></div>
       </div>
     ")
 
     addBuild $dffnContainer
+    addHeroes $dffnContainer
 
-    $("BODY").prepend($dffnContainer)
     $("#wrap").hide()
+    $("BODY").prepend $dffnContainer
 
   addBuild = ($container) ->
+    # Get the placeholders from the container
+    $itemGroups = $("#__dffn_itemgroups", $container)
+    $skills = $("#__dffn_skills", $container)
 
+    # Scrape Item Groups
     itemGroups =
       for $ig in $("DIV.build-tab:visible DIV.items>H4").parent()
         new ItemGroup $("H4", $ig).text(), $("IMG", $ig)
 
+    # Scrape Build
     skillBuild = new SkillBuild $("DIV.build-tab:visible DIV.skill-box TD.selected.c")
 
-    $itemGroups = $("#__dffn_itemgroups", $container)
-    $skills = $("#__dffn_skills", $container)
-
+    # Item Groups
     for itemGroup in itemGroups
-      template = []
-      template.push "<div class='__dffn_itemgroup'><h4>#{itemGroup.name}</h4><ul>"
-
+      itemTemplate = ["<div class='__dffn_itemgroup'><h4>#{itemGroup.name}</h4><ul>"]
       for item in itemGroup.items
-        template.push "<li><img src='#{item.src}' /> #{item.name}</li>"
+        itemTemplate.push "<li><img src='#{item.src}' /> #{item.name}</li>"
 
-      template.push "</ul></div>"
-      $itemGroups.append(template.join(""))
+      itemTemplate.push "</ul></div>"
+      $itemGroups.append itemTemplate.join ""
 
-    skillsTemplate = []
-    skillsTemplate.push "<h4>Hero Skills</h4>"
-    skillsTemplate.push "<ul>"
+    # Skills
+    skillsTemplate = ["<h4>Hero Skills</h4><ul>"]
 
     for skill in skillBuild.skills
-      key = ""
-      key = "<span class='__dffn_key'>(#{skill.key}</span>)" if skill.key.length > 0
+      key = if skill.key.length > 0 then "<span class='__dffn_key'>(#{skill.key})</span>" else ""
       skillsTemplate.push "<li><span class='__dffn_level'>#{skill.level}</span> <img src='#{skill.skillImg}'/> #{key} #{skill.name}</li>"
 
     skillsTemplate.push "</ul>"
+    $skills.append skillsTemplate.join ""
 
-    $skills.append(skillsTemplate.join(""))
+  addHeroes = ($container) ->
+    $heroes = $("#__dffn_heroes", $container)
+
+    # Scrape the hero list
+    heroes = for link in $("#footer-links .foot-links a.ajax-tooltip")
+      new Hero link.innerText, link.href
+
+    heroes.sort (a, b) ->
+      if a.name >= b.name then 1 else -1
+
+    # Build the list
+    heroesTemplate = ["<h4>Heroes</h4><ul>"]
+
+    for hero in heroes
+      heroesTemplate.push "<li><a href='#{hero.url}'>#{hero.name}</a></li>"
+
+    heroesTemplate.push "</ul>"
+    $heroes.append heroesTemplate.join ""
 
 # Do this only once
 if not window.dffn?
