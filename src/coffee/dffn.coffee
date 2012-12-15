@@ -4,11 +4,11 @@ $ = window.jQuery
 # Util Functions
 class util
   this.cleanUp = ->
-    $("#__dffn_container").remove()
+    $("#__dffn_styles, #__dffn_container").remove()
     $("#wrap").show()
 
   this.addStyles = ->
-    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/lib/css/dffn.css?v=1_3'>")
+    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://localhost/dffn/lib/css/dffn.css?v=1_3'>")
 
   # Lifted from http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
   this.titleCase = (str) ->
@@ -55,9 +55,13 @@ class SkillBuild
 class Hero
   constructor: (@name, @url) ->
 
+class Guide
+  constructor: (@name, @url, @icon, @byline, @rating, @votes) ->
+
 class Dffn
   noobify: ->
     util.cleanUp()
+    util.addStyles()
 
     title = $("TITLE").text()
     buildName = $(".build-tab:visible H2").text()
@@ -69,12 +73,14 @@ class Dffn
         <h2>#{buildName}</h2>
         <div id='__dffn_itemgroups'></div>
         <div id='__dffn_skills'></div>
+        <div id='__dffn_guides'></div>
         <div id='__dffn_heroes'></div>
       </div>
     ")
 
     addBuild $dffnContainer
     addHeroes $dffnContainer
+    addGuides $dffnContainer
 
     $("#wrap").hide()
     $("BODY").prepend $dffnContainer
@@ -136,13 +142,53 @@ class Dffn
     heroesTemplate.push "</ul>"
     $heroes.append heroesTemplate.join ""
 
+  addGuides = ($container) ->
+    $heroes = $("#__dffn_guides", $container)
+
+    # Scrape the guides list
+    guides = for guideRow in $("DIV.list-box.hero-tab-target:visible TABLE TR")
+      name = $(".title A", guideRow).text()
+      url = $(".title A", guideRow).attr("href")
+      icon = $(".icon IMG", guideRow).attr("src")
+      byline = $(".byline", guideRow).text()
+      rating = $(".score.c IMG", guideRow).attr("src")
+      votes = $(".score.c .score-sub", guideRow).text()
+
+      new Guide name, url, icon, byline, rating, votes
+
+    if guides.length > 0
+      guidesTitle = $("DIV.hero-tab.selected.cursor:visible").text()
+      guidesTemplate = ["<h4>#{guidesTitle}</h4><ul>"]
+
+      for guide in guides
+        guidesTemplate.push "
+          <li>
+            <a href='#{guide.url}'>
+              <div class='__dffn_guidelabel'>
+                <img class='__dffn_guideicon' src='#{guide.icon}' />
+                <img class='__dffn_guiderating' src='#{guide.rating}' />
+                <span class='__dffn_guidevotes'>#{util.titleCase(guide.votes)}</span>
+              </div>
+              <div class='__dffn_guideinfo'>
+                <span class='__dffn_guidename' href='#{guide.url}'>#{guide.name}</span>
+                <span class='__dffn_guidebyline'>#{guide.byline}</span>
+              </div>
+            </a>
+          </li>
+        "
+
+      guidesTemplate.push "</ul>"
+
+      $heroes.append guidesTemplate.join ""
+    else
+      $heroes.remove()
+
 # Do this only once
 if not window.dffn?
   $("BODY").on "click", ".__dffn_close", (evt) ->
     evt.preventDefault()
     util.cleanUp()
 
-  util.addStyles()
   dffn = new Dffn()
   dffn.noobify()
 
