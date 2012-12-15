@@ -4,11 +4,11 @@ $ = window.jQuery
 # Util Functions
 class util
   this.cleanUp = ->
-    $("#__dffn_styles, #__dffn_container").remove()
+    $("#__dffn_container").remove()
     $("#wrap").show()
 
   this.addStyles = ->
-    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://localhost/dffn/lib/css/dffn.min.css?v=1_2'>")
+    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://localhost/dffn/lib/css/dffn.min.css?v=1_3'>")
 
   # Lifted from http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
   this.titleCase = (str) ->
@@ -58,7 +58,6 @@ class Hero
 class Dffn
   noobify: ->
     util.cleanUp()
-    util.addStyles()
 
     title = $("TITLE").text()
     buildName = $(".build-tab:visible H2").text()
@@ -94,23 +93,29 @@ class Dffn
     skillBuild = new SkillBuild $("DIV.build-tab:visible DIV.skill-box TD.selected.c")
 
     # Item Groups
-    for itemGroup in itemGroups
-      itemTemplate = ["<div class='__dffn_itemgroup'><h4>#{itemGroup.name}</h4><ul>"]
-      for item in itemGroup.items
-        itemTemplate.push "<li><img src='#{item.src}' /> #{item.name}</li>"
+    if itemGroups.length > 0
+      for itemGroup in itemGroups
+        itemTemplate = ["<div class='__dffn_itemgroup'><h4>#{itemGroup.name}</h4><ul>"]
+        for item in itemGroup.items
+          itemTemplate.push "<li><img src='#{item.src}' /> #{item.name}</li>"
 
-      itemTemplate.push "</ul></div>"
-      $itemGroups.append itemTemplate.join ""
+        itemTemplate.push "</ul></div>"
+        $itemGroups.append itemTemplate.join ""
+    else
+      $itemGroups.remove()
 
     # Skills
-    skillsTemplate = ["<h4>Hero Skills</h4><ul>"]
+    if skillBuild.skills.length > 0
+      skillsTemplate = ["<h4>Hero Skills</h4><ul>"]
 
-    for skill in skillBuild.skills
-      key = if skill.key.length > 0 then "<span class='__dffn_key'>(#{skill.key})</span>" else ""
-      skillsTemplate.push "<li><span class='__dffn_level'>#{skill.level}</span> <img src='#{skill.skillImg}'/> #{key} #{skill.name}</li>"
+      for skill in skillBuild.skills
+        key = if skill.key.length > 0 then "<span class='__dffn_key'>(#{skill.key})</span>" else ""
+        skillsTemplate.push "<li><span class='__dffn_level'>#{skill.level}</span> <img src='#{skill.skillImg}'/> #{key} #{skill.name}</li>"
 
-    skillsTemplate.push "</ul>"
-    $skills.append skillsTemplate.join ""
+      skillsTemplate.push "</ul>"
+      $skills.append skillsTemplate.join ""
+    else
+      $skills.remove()
 
   addHeroes = ($container) ->
     $heroes = $("#__dffn_heroes", $container)
@@ -120,7 +125,7 @@ class Dffn
       new Hero link.innerText, link.href
 
     heroes.sort (a, b) ->
-      if a.name >= b.name then 1 else -1
+      if a.name > b.name then 1 else -1
 
     # Build the list
     heroesTemplate = ["<h4>Heroes</h4><ul>"]
@@ -137,6 +142,7 @@ if not window.dffn?
     evt.preventDefault()
     util.cleanUp()
 
+  util.addStyles()
   dffn = new Dffn()
   dffn.noobify()
 
