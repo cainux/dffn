@@ -1,20 +1,26 @@
 {exec} = require "child_process"
 fs = require "fs"
 
-callback = (err, stdout, stderr) ->
-  throw err if err
-  console.log stdout + stderr
-
-task "default", "Default", ->
-  invoke "build"
-  invoke "minify"
-
 task "build", "Build Project", ->
-  exec "coffee --compile --output ../lib/js ./coffee/dffn.coffee", callback
+  exec "coffee --compile --output ./lib/js ./src/coffee/dffn.coffee"
+  exec "yuicompressor ./lib/js/dffn.js > ./lib/js/dffn.min.js"
+  exec "lessc --yui-compress ./src/less/dffn.less > ./lib/css/dffn.min.css"
 
-task "minify", "Munge Static Files", ->
-  exec "yuicompressor ../lib/js/dffn.js > ../lib/js/dffn.min.js", callback
-  exec "lessc --yui-compress ./less/dffn.less > ../lib/css/dffn.min.css", callback
+task "live", "Applies LIVE Urls", ->
+  setUrls /localhost\/dffn/g, "dffn.azurewebsites.net"
 
-setLiveUrls = ->
-  fs.readFile 
+task "dev", "Applies DEV Urls", ->
+  setUrls /dffn\.azurewebsites\.net/g, "localhost/dffn"
+
+setUrls = (pattern, value) ->
+  replaceInFile path, pattern, value for path in ["./src/coffee/dffn.coffee", "./index.html"]
+
+replaceInFile = (sourceFile, pattern, value) ->
+  fs.readFile sourceFile, "utf8", (error, sourceCode) ->
+    throw error if error
+
+    newSourceCode = sourceCode.replace pattern, value
+
+    fs.writeFile sourceFile, newSourceCode, "utf8", (err) ->
+      throw err if err
+      console.log "Wrote out #{sourceFile}"
