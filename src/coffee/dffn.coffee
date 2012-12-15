@@ -1,22 +1,16 @@
-# Do this only once
-if (!@df4nLoaded)
-  $("BODY").on "click", ".__df4n_close", (evt) ->
-    evt.preventDefault()
-    cleanUp()
-  @df4nLoaded = true
-
 # Util Functions
-cleanUp = ->
-  $("#__df4n_styles, #__df4n_container").remove()
-  $("#wrap").show()
+class util
+  this.cleanUp = ->
+    $("#__dffn_styles, #__dffn_container").remove()
+    $("#wrap").show()
 
-addStyles = ->
-  $("HEAD").append("<link id='__df4n_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/lib/css/dffn.min.css?v=1_1'>")
+  this.addStyles = ->
+    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://localhost/dffn/lib/css/dffn.min.css?v=1_2'>")
 
-# Lifted from http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
-titleCase = (str) ->
-  str.replace(/\w\S*/g, (txt) ->
-    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+  # Lifted from http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+  this.titleCase = (str) ->
+    str.replace(/\w\S*/g, (txt) ->
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
 
 # Types
 class Item
@@ -26,7 +20,7 @@ class ItemGroup
   constructor: (@name, $items) ->
     @items =
       for item in $items
-        name = titleCase(item.src.replace(/^.+?\/item\//i, "").replace(/\.png$/i, "").replace(/-/g, " "))
+        name = util.titleCase(item.src.replace(/^.+?\/item\//i, "").replace(/\.png$/i, "").replace(/-/g, " "))
         src = item.src
 
         new Item name, src
@@ -55,58 +49,73 @@ class SkillBuild
     @skills.sort (a, b) ->
       if a.level >= b.level then 1 else -1
 
-# Work
-cleanUp()
-addStyles()
+class Hero
+  constructor: (@name, @url) ->
 
-itemGroups =
-  for $ig in $("DIV.build-tab:visible DIV.items>H4").parent()
-    new ItemGroup $("H4", $ig).text(), $("IMG", $ig)
+class Dffn
+  noobify: ->
+    util.cleanUp()
+    util.addStyles()
 
-skillBuild = new SkillBuild $("DIV.build-tab:visible DIV.skill-box TD.selected.c")
+    title = $("TITLE").text()
+    buildName = $(".build-tab:visible H2").text()
 
-title = $("TITLE").text()
-buildName = $(".build-tab:visible H2").text()
+    $dffnContainer = $("
+      <div id='__dffn_container'>
+        <a class='__dffn_close'>close</a>
+        <h1>#{title}</h1>
+        <h2>#{buildName}</h2>
+        <div id='__dffn_itemgroups'></div>
+        <div id='__dffn_skills'></div>
+      </div>
+    ")
 
-# Inject Noob Info
-$df4nContainer = $("
-  <div id='__df4n_container'>
-    <a class='__df4n_close'>close</a>
-    <h1>#{title}</h1>
-    <h2>#{buildName}</h2>
-    <div id='__df4n_itemgroups'></div>
-    <div id='__df4n_skills'></div>
-  </div>
-")
+    addBuild $dffnContainer
 
-$df4nItemGroups = $("#__df4n_itemgroups", $df4nContainer)
-$df4nSkills = $("#__df4n_skills", $df4nContainer)
+    $("BODY").prepend($dffnContainer)
+    $("#wrap").hide()
 
-for itemGroup in itemGroups
-  template = []
-  template.push "<div class='__df4n_itemgroup'>"
-  template.push "<h4>#{itemGroup.name}</h4>"
-  template.push "<ul>"
+  addBuild = ($container) ->
 
-  for item in itemGroup.items
-    template.push "<li><img src='#{item.src}' /> #{item.name}</li>"
+    itemGroups =
+      for $ig in $("DIV.build-tab:visible DIV.items>H4").parent()
+        new ItemGroup $("H4", $ig).text(), $("IMG", $ig)
 
-  template.push "</ul>"
-  template.push "</div>"
-  $df4nItemGroups.append(template.join(""))
+    skillBuild = new SkillBuild $("DIV.build-tab:visible DIV.skill-box TD.selected.c")
 
-skillsTemplate = []
-skillsTemplate.push "<h4>Hero Skills</h4>"
-skillsTemplate.push "<ul>"
+    $itemGroups = $("#__dffn_itemgroups", $container)
+    $skills = $("#__dffn_skills", $container)
 
-for skill in skillBuild.skills
-  key = ""
-  key = "<span class='__df4n_key'>(#{skill.key}</span>)" if skill.key.length > 0
-  skillsTemplate.push "<li><span class='__df4n_level'>#{skill.level}</span> <img src='#{skill.skillImg}'/> #{key} #{skill.name}</li>"
+    for itemGroup in itemGroups
+      template = []
+      template.push "<div class='__dffn_itemgroup'><h4>#{itemGroup.name}</h4><ul>"
 
-skillsTemplate.push "</ul>"
+      for item in itemGroup.items
+        template.push "<li><img src='#{item.src}' /> #{item.name}</li>"
 
-$df4nSkills.append(skillsTemplate.join(""))
+      template.push "</ul></div>"
+      $itemGroups.append(template.join(""))
 
-$("BODY").prepend($df4nContainer)
-$("#wrap").hide()
+    skillsTemplate = []
+    skillsTemplate.push "<h4>Hero Skills</h4>"
+    skillsTemplate.push "<ul>"
+
+    for skill in skillBuild.skills
+      key = ""
+      key = "<span class='__dffn_key'>(#{skill.key}</span>)" if skill.key.length > 0
+      skillsTemplate.push "<li><span class='__dffn_level'>#{skill.level}</span> <img src='#{skill.skillImg}'/> #{key} #{skill.name}</li>"
+
+    skillsTemplate.push "</ul>"
+
+    $skills.append(skillsTemplate.join(""))
+
+# Do this only once
+if not window.dffn?
+  $("BODY").on "click", ".__dffn_close", (evt) ->
+    evt.preventDefault()
+    util.cleanUp()
+
+  dffn = new Dffn()
+  dffn.noobify()
+
+  window.dffn = dffn
