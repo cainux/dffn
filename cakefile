@@ -2,9 +2,13 @@
 fs = require "fs"
 
 task "build", "Build Project", ->
-  exec "coffee --compile --output ./lib/js ./src/coffee/dffn.coffee"
-  exec "yuicompressor ./lib/js/dffn.js > ./lib/js/dffn.min.js"
-  exec "lessc --yui-compress ./src/less/dffn.less > ./lib/css/dffn.min.css"
+  invoke "live"
+  exec "lessc --yui-compress ./src/less/dffn.less > ./lib/css/dffn.css"
+  exec "coffee --compile --output ./lib/js ./src/coffee/dffn.coffee", () ->
+    exec "yuicompressor ./lib/js/dffn.js > ./lib/js/dffn.min.js", () ->
+      fs.unlink "./lib/js/dffn.js"
+      fs.rename "./lib/js/dffn.min.js", "./lib/js/dffn.js"
+      fs.unlink "./lib/js/dffn.min.js"
 
 task "live", "Applies LIVE Urls", ->
   setUrls /localhost\/dffn/g, "dffn.azurewebsites.net"
@@ -18,9 +22,5 @@ setUrls = (pattern, value) ->
 replaceInFile = (sourceFile, pattern, value) ->
   fs.readFile sourceFile, "utf8", (error, sourceCode) ->
     throw error if error
-
     newSourceCode = sourceCode.replace pattern, value
-
-    fs.writeFile sourceFile, newSourceCode, "utf8", (err) ->
-      throw err if err
-      console.log "Wrote out #{sourceFile}"
+    fs.writeFile sourceFile, newSourceCode, "utf8"

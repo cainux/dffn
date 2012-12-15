@@ -8,7 +8,7 @@ class util
     $("#wrap").show()
 
   this.addStyles = ->
-    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/lib/css/dffn.min.css?v=1_3'>")
+    $("HEAD").append("<link id='__dffn_styles' rel='stylesheet' type='text/css' href='http://dffn.azurewebsites.net/lib/css/dffn.css?v=1_3'>")
 
   # Lifted from http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
   this.titleCase = (str) ->
